@@ -1,0 +1,22 @@
+{
+    "name": "darkfriend/php7-debug",
+    "type": "library",
+    "description": "PHP7 debug helper",
+    "keywords": ["dev","debug","helper","darkfriend","development","php7","php"],
+    "homepage": "https://github.com/darkfriend/php7-debug",
+    "authors": [
+        {
+            "name": "darkfriend",
+            "email": "hi@darkfriend.ru"
+        }
+    ],
+    "require": {
+        "php":">=7.0"
+    },
+    "autoload": {
+        "classmap":[
+            "./DebugHelper.php",
+            "./Debug.php"
+        ]
+    }
+}
