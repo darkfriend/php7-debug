@@ -1,14 +1,9 @@
-# DebugHelper
+# DebugHelper - удобный дебаггинг и трассировка данных
 
 * ```DebugHelper::$mainKey``` - свойство, содержащее имя ключа для $_COOKIE и $_GET
 * ```DebugHelper::print_pre($o,$die,$show)``` - статичный метод, который выводит всю структуру массива и объекта, с информацией о файле и строке (подробности ниже)
 * ```DebugHelper::call($func,$params)``` - статичный метод, который вызывает переданную функцию только у админа, передавая нужные параметры (подробности ниже)
 * ```DebugHelper::trace($message,$category='common')``` - статичный метод трессировки (ниже примеры использования)
-* StringHelper
-* ```StringHelper::htmlspecialchars($val)``` - статичный метод, который делает htmlspecialchars() для строк и массивов
-* ```StringHelper::htmlspecialchars_decode($val)``` - статичный метод, который делает htmlspecialchars_decode() для строк и массивов
-* ```StringHelper::generateString($length,$chars)``` - статичный метод, который возвращает сгенерированную строку нужной длины
-* ```StringHelper::getDeclension($value,$words)``` - статичный метод, который возвращает окончания слов при слонении. _Например: 5 товаров, 1 товар, 3 товара_
 
 ## DebugHelper::print_pre($o,$die,$show);
 * $o - данные, которые надо вывести
