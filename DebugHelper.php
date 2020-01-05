@@ -6,12 +6,13 @@ namespace darkfriend\helpers;
  * Class DebugHelper
  * @package darkfriend\helpers
  * @author darkfriend <hi@darkfriend.ru>
- * @version 1.0.0
+ * @version 1.0.1
  */
 class DebugHelper
 {
     public static $mainKey = 'ADMIN';
     public static $traceMode;
+    public static $fileSizeRotate = 30;
 
     protected static $pathLog = '/';
     protected static $hashName;
@@ -80,16 +81,20 @@ class DebugHelper
 
         switch (self::$traceMode) {
             case self::TRACE_MODE_REPLACE:
-                $flag = \FILE_BINARY;
+                $flag = \FILE_BINARY | \LOCK_EX;
                 break;
             default:
-                $flag = \FILE_APPEND;
+                $flag = \FILE_APPEND | \LOCK_EX;
         }
 
-        $file = $_SERVER['DOCUMENT_ROOT'] . self::$pathLog . self::$hashName . 'trace.log';
+//        $file = $_SERVER['DOCUMENT_ROOT'] . self::$pathLog . self::$hashName . 'trace.log';
+        $file = self::getFile();
+
         if (!\is_dir(\dirname($file))) {
             @mkdir(\dirname($file), 0777, true);
         }
+
+        LogRotate::process($file, static::$fileSizeRotate);
 
         \file_put_contents(
             $file,
@@ -101,6 +106,27 @@ class DebugHelper
             . "\n------TRACE_END------.\n\n\n\n",
             $flag
         );
+    }
+
+    /**
+     * Return path to file
+     * @return string
+     * @since 1.0.2
+     */
+    public static function getFile()
+    {
+        if(strpos(self::$pathLog, $_SERVER['DOCUMENT_ROOT']) !== false) {
+            $file = self::$pathLog;
+        } else {
+            $file = $_SERVER['DOCUMENT_ROOT'] . self::$pathLog;
+        }
+
+        if(strpos(self::$pathLog,'.log')===false) {
+            $file = rtrim($file);
+            $file .= '/'. self::$hashName . 'trace.log';
+        }
+
+        return $file;
     }
 
     /**

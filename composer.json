@@ -2,7 +2,9 @@
     "name": "darkfriend/php7-debug",
     "type": "library",
     "description": "PHP7 debug helper",
-    "keywords": ["dev","debug","helper","darkfriend","development","php7","php"],
+    "keywords": [
+        "dev","debug","helper","darkfriend","development","php7","php","trace","logger","log"
+    ],
     "homepage": "https://github.com/darkfriend/php7-debug",
     "authors": [
         {
@@ -16,7 +18,10 @@
     "autoload": {
         "classmap":[
             "./DebugHelper.php",
-            "./Debug.php"
+            "./Debug.php",
+            "./LogRotate.php",
+            "./Log.php",
+            "./Trace.php"
         ]
     }
 }
