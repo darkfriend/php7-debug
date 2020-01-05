@@ -1,4 +1,74 @@
-# DebugHelper - удобный дебаггинг и трассировка данных
+# Debug, Log, Trace
+
+Классы помощники для PHP7
+* для трассировки и логирования данных
+* для дебага разных частей кода
+
+## Trace
+Трассировка данных в файл
+
+* ``` Trace::init($sessionHash = null, $mode = null, $pathLog = '/') ``` - инициализация, указывается только для изменения первоначальных или ранее определенных настроек
+* ``` Trace::add($message, $category = 'common') ``` - добавление сообщения в файл
+
+### Trace Example
+```php
+// basic usage
+\darkfriend\helpers\Trace::add('my message'); // добавляет строку
+// \darkfriend\helpers\Trace::add(['my message']); // добавляем любой массив или объект
+```
+
+```php
+// example: set trace file
+\darkfriend\helpers\Trace::init(
+    null,
+    null,
+    './logs/trace.log'
+);
+\darkfriend\helpers\Trace::add('my message'); // добавляет строку в файл trace.log
+// \darkfriend\helpers\Trace::add(['my message']); // добавляем любой массив или объект в файл trace.log
+
+\darkfriend\helpers\Trace::init(
+    null,
+    null,
+    './logs/custom.log'
+);
+\darkfriend\helpers\Trace::add('my message'); // добавляет строку в файл custom.log
+// \darkfriend\helpers\Trace::add(['my message']); // добавляем любой массив или объект в файл custom.log
+```
+
+## Log
+Логированные данных в файл
+
+* ``` Trace::init($sessionHash = null, $mode = null, $pathLog = '/') ``` - инициализация, указывается только для изменения первоначальных или ранее определенных настроек
+* ``` Trace::add($message, $category = 'common') ``` - добавление сообщения в файл
+
+### Trace Example
+```php
+// basic usage
+\darkfriend\helpers\Log::add('my message'); // добавляет строку
+// \darkfriend\helpers\Trace::add(['my message']); // добавляем любой массив или объект
+```
+
+```php
+// example: set trace file
+\darkfriend\helpers\Log::init(
+    null,
+    null,
+    './logs/basic.log'
+);
+\darkfriend\helpers\Log::add('my message'); // добавляет строку в файл basic.log
+// \darkfriend\helpers\Trace::add(['my message']); // добавляем любой массив или объект в файл basic.log
+
+\darkfriend\helpers\Log::init(
+    null,
+    null,
+    './logs/custom.log'
+);
+\darkfriend\helpers\Log::add('my message'); // добавляет строку в файл custom.log
+// \darkfriend\helpers\Trace::add(['my message']); // добавляем любой массив или объект в файл custom.log
+```
+
+## Debug (alias DebugHelper) - удобный дебаггинг и трассировка данных
 
 * ```DebugHelper::$mainKey``` - свойство, содержащее имя ключа для $_COOKIE и $_GET
 * ```DebugHelper::print_pre($o,$die,$show)``` - статичный метод, который выводит всю структуру массива и объекта, с информацией о файле и строке (подробности ниже)
