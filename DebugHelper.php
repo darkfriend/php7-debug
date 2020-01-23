@@ -6,10 +6,14 @@ namespace darkfriend\helpers;
  * Class DebugHelper
  * @package darkfriend\helpers
  * @author darkfriend <hi@darkfriend.ru>
- * @version 1.0.3
+ * @version 1.0.4
  */
 class DebugHelper
 {
+    /**
+     * @var string
+     * @deprecated
+     */
     public static $mainKey = 'ADMIN';
     public static $traceMode;
     /** @var int value in Mb */
@@ -19,8 +23,15 @@ class DebugHelper
     protected static $pathLog = '/';
     /** @var string */
     protected static $hashName;
-    /** @var string */
-    protected static $root;
+
+    /**
+     * @var array = [
+     *     'htmlentities' => true,
+     *     'root' => $_SERVER['DOCUMENT_ROOT'],
+     *     'cookieName' => 'ADMIN,
+     * ]
+     */
+    protected static $config;
 
     const TRACE_MODE_REPLACE = 1;
     const TRACE_MODE_APPEND = 2;
@@ -31,20 +42,34 @@ class DebugHelper
      * @param array $o
      * @param bool $die stop application after output
      * @param bool $show all output or output only $_COOKIE['ADMIN']
+     * @param array $params
      * @return void
      */
-    public static function print_pre($o, $die = false, $show = true)
+    public static function print_pre($o, $die = false, $show = true, $params = [])
     {
+        if(!isset($params['btIndex'])) {
+            $params['btIndex'] = 0;
+        }
+
         $bt = \debug_backtrace();
-        $bt = $bt[0];
-        $dRoot = $_SERVER['DOCUMENT_ROOT'];
+        $bt = $bt[$params['btIndex']];
+        $dRoot = $_SERVER['DOCUMENT_ROOT'] ?? self::getRoot();
         $dRoot = \str_replace("/", "\\", $dRoot);
         $bt['file'] = \str_replace($dRoot, "", $bt['file']);
         $dRoot = \str_replace("\\", "/", $dRoot);
         $bt['file'] = \str_replace($dRoot, "", $bt['file']);
 
+        if(isset($params['pIndex'])) {
+            $bt['pIndex'] = $params['pIndex'];
+        } else {
+            $bt['pIndex'] = 0;
+        }
+
         if(!self::isCli()) {
-            if (!$show && !empty($_COOKIE[self::$mainKey])) {
+            if (
+                !$show
+                && !empty($_COOKIE[self::getConfig('cookieName',self::$mainKey)])
+            ) {
                 $show = true;
             }
             if (!$show) return;
@@ -60,46 +85,60 @@ class DebugHelper
     /**
      * Output formatted <pre>.
      * Wrap for print_pre()
-     * @param $o
-     * @param bool $die
-     * @param bool $show
+     * @param ...$o
+     * @return self
      * @see print_pre()
      * @since 1.0.3
      */
-    public static function pre($o, $die = false, $show = true)
+    public static function pre(...$o)
     {
-        self::print_pre($o, $die, $show);
+        foreach ($o as $k=>$item) {
+            self::print_pre(
+                $item,
+                false,
+                true,
+                [
+                    'btIndex' => 1,
+                    'pIndex' => $k
+                ]
+            );
+        }
+        return self::class;
     }
 
     /**
-     * Get output string print_pre for web
-     * @param mixed $o
-     * @param array $bt
-     * @return string
-     * @since 1.0.3
+     * Set configs
+     * @param array $config
+     * @return self
+     * @since 1.0.4
      */
-    protected static function getOutputPreWeb($o, $bt)
+    public static function conf($config=[])
     {
-        return "
-        <div style='font-size:9pt; color:#000; background:#fff; border:1px dashed #000;'>
-            <div style='padding:3px 5px; background:#99CCFF; font-weight:bold;'>File: {$bt['file']}
-                [{$bt['line']}]
-            </div>
-            <pre style='padding:10px;'>".self::getOutputPre($o)."</pre>
-        </div>
-        ";
+        self::$config = $config;
+        return self::class;
     }
 
     /**
-     * Get output string print_pre for cli
-     * @param mixed $o
-     * @param array $bt
-     * @return string
-     * @since 1.0.3
+     * Terminates execution of the script
+     * @param bool $die
+     * @since 1.0.4
      */
-    protected static function getOutputPreCli($o, $bt)
+    public static function d($die=true)
     {
-        return self::getOutputPre($o);
+        if($die) {
+            die();
+        }
+    }
+
+    /**
+     * Alias ```self::d()```
+     * @param bool $die
+     * @see d()
+     * @since 1.0.4
+     */
+    public static function stop($die=true)
+    {
+        self::d($die);
     }
 
     /**
@@ -110,8 +149,9 @@ class DebugHelper
      */
     public static function call(callable $func, $params = [])
     {
-        $show = isset($_COOKIE[self::$mainKey]);
-        if (!$show) $show = isset($_GET[self::$mainKey]);
+        $cookieName = self::getConfig('cookieName', self::$mainKey);
+        $show = isset($_COOKIE[$cookieName]);
+        if (!$show) $show = isset($_GET[$cookieName]);
         if ($show) $func($params);
     }
 
@@ -238,7 +278,7 @@ class DebugHelper
      */
     public static function setRoot($str)
     {
-        self::$root = $str;
+        self::setConfig('root', $str);
     }
 
     /**
@@ -248,7 +288,77 @@ class DebugHelper
      */
     public static function getRoot()
     {
-        return self::$root ? self::$root : $_SERVER['DOCUMENT_ROOT'];
+        return self::getConfig('root', $_SERVER['DOCUMENT_ROOT']);
+    }
+
+    /**
+     * Get config param
+     * @param string $param
+     * @param mixed $default
+     * @return mixed
+     * @since 1.0.4
+     */
+    public static function getConfig($param, $default = '')
+    {
+        if(isset(self::$config[$param])) {
+            return self::$config[$param];
+        } else {
+            return $default;
+        }
+    }
+
+    /**
+     * Set value to config param
+     * @param string $param
+     * @param mixed $value
+     * @return self
+     * @since 1.0.4
+     */
+    public static function setConfig($param, $value = '')
+    {
+        self::$config[$param] = $value;
+        return self::class;
+    }
+
+    /**
+     * Get output string print_pre for web
+     * @param mixed $o
+     * @param array $bt
+     * @return string
+     * @since 1.0.3
+     */
+    protected static function getOutputPreWeb($o, $bt)
+    {
+        if(!isset($bt['pIndex'])) {
+            $bt['pIndex'] = 'null';
+        }
+        return "
+        <div style='font-size:9pt; color:#000; background:#fff; border:1px dashed #000;'>
+            <div style='padding:3px 5px; background:#99CCFF; font-weight:bold;'>File: {$bt['file']}
+                [{$bt['line']}:{$bt['pIndex']}]
+            </div>
+            <pre style='padding:10px;'>".self::getOutputPre($o)."</pre>
+        </div>
+        ";
+    }
+
+    /**
+     * Get output string print_pre for cli
+     * @param mixed $o
+     * @param array $bt
+     * @return string
+     * @since 1.0.3
+     */
+    protected static function getOutputPreCli($o, $bt)
+    {
+        if(!isset($bt['pIndex'])) {
+            $bt['pIndex'] = 0;
+        }
+        return
+            PHP_EOL."File: {$bt['file']} [{$bt['line']}:{$bt['pIndex']}]:"
+            .PHP_EOL
+            .self::getOutputPre($o)
+            .PHP_EOL;
     }
 
     /**
@@ -260,9 +370,13 @@ class DebugHelper
     protected static function getOutputPre($o)
     {
         if(self::isCli()) {
-            return \print_r($o, true);
+            return \var_export($o, true);
         } else {
-            return \htmlentities(\print_r($o, true));
+            $o = \print_r($o, true);
+            if(self::getConfig('htmlentities', true)) {
+                $o = \htmlentities($o);
+            }
+            return $o;
         }
     }
 
