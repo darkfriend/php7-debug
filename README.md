@@ -1,5 +1,7 @@
 # Debug, Log, Trace
 
+``composer require darkfriend/php7-debug``
+
 Классы помощники для PHP7
 * для трассировки и логирования данных
 * для дебага разных частей кода
