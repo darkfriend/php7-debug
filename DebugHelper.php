@@ -207,14 +207,14 @@ class DebugHelper
      */
     public static function getFile()
     {
-        if(strpos(self::$pathLog, self::getRoot()) !== false) {
+        if(self::getRoot() && \strpos(self::$pathLog, self::getRoot()) !== false) {
             $file = self::$pathLog;
         } else {
             $file = self::getRoot() . self::$pathLog;
         }
 
-        if(strpos(self::$pathLog,'.log')===false) {
-            $file = rtrim($file);
+        if(\strpos(self::$pathLog,'.log')===false) {
+            $file = \rtrim($file);
             $file .= '/'. self::$hashName . 'trace.log';
         }
 
@@ -288,6 +288,9 @@ class DebugHelper
      */
     public static function getRoot()
     {
+        if(self::isCli()) {
+            return self::getConfig('root');
+        }
         return self::getConfig('root', $_SERVER['DOCUMENT_ROOT']);
     }
 
