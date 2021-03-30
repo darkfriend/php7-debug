@@ -6,7 +6,7 @@ namespace darkfriend\helpers;
  * Class DebugHelper
  * @package darkfriend\helpers
  * @author darkfriend <hi@darkfriend.ru>
- * @version 1.0.4
+ * @version 1.0.6
  */
 class DebugHelper
 {
@@ -207,7 +207,7 @@ class DebugHelper
      */
     public static function getFile()
     {
-        if(self::getRoot() && \strpos(self::$pathLog, self::getRoot()) !== false) {
+        if(self::getRoot() && \strpos(self::$pathLog, '/')===0) {
             $file = self::$pathLog;
         } else {
             $file = self::getRoot() . self::$pathLog;
